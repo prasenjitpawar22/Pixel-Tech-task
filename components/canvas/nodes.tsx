@@ -3,7 +3,7 @@ import { CircleAlert, X } from "lucide-react";
 import { Handle, Node, NodeProps, NodeResizer, Position, useReactFlow } from "@xyflow/react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { v4 as uuidv4 } from 'uuid';
-import { ChangeEvent, useCallback, useEffect, useState } from "react";
+import { ChangeEvent, useCallback, useEffect } from "react";
 import { Button } from "../ui/button";
 import { useNodesContext } from "./provider";
 import { toast } from "sonner";
@@ -55,10 +55,10 @@ export const StripeNode = (props: CustomNode) => <PaymentNodeBase {...props} dat
 export const ApplePayNode = (props: CustomNode) => <PaymentNodeBase {...props} data={{ label: 'Apple Pay', amount: '' }} />;
 
 
-export const PaymentInitializedNode = ({ data, id, selected, }: CustomNode) => {
-    const { setNodeHistory, } = useNodesContext();
+export const PaymentInitializedNode = ({ data, id }: CustomNode) => {
+    const { setNodeHistory } = useNodesContext();
     return (
-        <div className={`border rounded-full bg-background flex items-center justify-between px-2 py-1 text-xs relative w-[180px]`}>
+        <div className="border rounded-full bg-background flex items-center justify-between px-2 py-1 text-xs relative w-[180px]">
             <CircleAlert size={12} className={`absolute ${parseInt(data.amount) < 100 ? 'hidden' : 'block text-red-500'} -top-1 fill-white right-[28px]`} />
             <Handle
                 type="source"
@@ -122,25 +122,19 @@ export const CustomControls = () => {
     }
 
     const handleUndo = () => {
-        setNodeHistory((prev) => {
-            const newHistory = {
-                past: prev.past.slice(0, -1),
-                present: prev.past[prev.past.length - 1],
-                future: [prev.present, ...prev.future],
-            };
-            return newHistory;
-        });
+        setNodeHistory((prev) => ({
+            past: prev.past.slice(0, -1),
+            present: prev.past[prev.past.length - 1],
+            future: [prev.present, ...prev.future],
+        }));
     }
 
     const handleRedo = () => {
-        setNodeHistory((prev) => {
-            const newHistory = {
-                past: [...prev.past, prev.present],
-                present: prev.future[0],
-                future: prev.future.slice(1),
-            };
-            return newHistory;
-        });
+        setNodeHistory((prev) => ({
+            past: [...prev.past, prev.present],
+            present: prev.future[0],
+            future: prev.future.slice(1),
+        }));
     }
 
     const handleInitializePayment = () => {
@@ -158,7 +152,6 @@ export const CustomControls = () => {
             present: [...prev.present, node],
             future: [],
         }))
-        // setPaymentInitialized(true);
     }
 
     const onSave = useCallback(() => {

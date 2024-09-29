@@ -1,6 +1,6 @@
 "use client"
-import { addEdge, applyEdgeChanges, applyNodeChanges, Background, Controls, Edge, HandleType, Node, OnConnect, OnEdgesChange, OnNodesChange, OnReconnect, ReactFlow, ReactFlowInstance, reconnectEdge, } from "@xyflow/react";
-import { useCallback, useMemo, useRef, useState, } from "react";
+import { addEdge, applyNodeChanges, Background, Controls, Edge, OnConnect, OnEdgesChange, OnNodesChange, OnReconnect, ReactFlow, reconnectEdge, } from "@xyflow/react";
+import { useCallback, useMemo, useRef, } from "react";
 import { CustomControls, ApplePayNode, GooglePayNode, PaymentInitializedNode, PaypalNode, StripeNode } from "./nodes";
 import '@xyflow/react/dist/style.css';
 import { useNodesContext } from "./provider";
@@ -38,7 +38,7 @@ export const Canvas = () => {
             future: prev.future,
         }))
 
-    }, [])
+    }, [setNodeHistory])
 
     const onEdgesChange: OnEdgesChange = useCallback((changes) => {
         // if 
@@ -66,7 +66,7 @@ export const Canvas = () => {
         })
     }, []);
 
-    const onReconnectEnd = (event: MouseEvent | TouchEvent, edge: Edge, handleType: HandleType) => {
+    const onReconnectEnd = (event: MouseEvent | TouchEvent, edge: Edge,) => {
         if (!edgeReconnectSuccessful.current) {
             setEdgeHistory((prev) => {
                 return {
@@ -110,7 +110,6 @@ export const Canvas = () => {
                     onReconnectStart={onReconnectStart}
                     onReconnectEnd={onReconnectEnd}
                     onInit={(rfInstance) => setRfInstance(rfInstance)}
-                // snapToGrid
                 >
                     <Background />
                     <Controls className="dark:text-foreground dark:hover:*:bg-muted dark:*:bg-background dark:*:border dark:*:border-border " />
