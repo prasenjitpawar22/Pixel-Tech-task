@@ -1,21 +1,22 @@
 "use client"
 import { CircleAlert, X } from "lucide-react";
 import { Handle, Node, NodeProps, NodeResizer, Position, useReactFlow } from "@xyflow/react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuShortcut, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { v4 as uuidv4 } from 'uuid';
-import { ChangeEvent, useCallback, useEffect } from "react";
+import { ChangeEvent, createElement, useCallback, useEffect } from "react";
 import { Button } from "../ui/button";
 import { useNodesContext } from "./provider";
 import { toast } from "sonner";
 import { Input } from "../ui/input";
 import { useKeyPress } from '@xyflow/react';
+import { Icons } from "../icons";
 
 
 const flowKey = 'example-flow';
 
-type CustomNode = NodeProps & { data: { amount: string, label: string } }
+type CustomNode = NodeProps & { data: { amount: string, label: string, icon: JSX.ElementType } }
 
-const PaymentNodeBase = ({ data: { amount, label }, id, selected, width, height }: CustomNode) => {
+const PaymentNodeBase = ({ data: { amount, label, icon }, id, selected, width, height }: CustomNode) => {
     const { deleteElements } = useReactFlow();
 
     const onClick = useCallback(() => {
@@ -31,6 +32,7 @@ const PaymentNodeBase = ({ data: { amount, label }, id, selected, width, height 
                 position={Position.Left}
                 style={{ left: -8, top: '50%', transform: 'translateY(-50%)' }}
             />
+            {icon && createElement(icon, { className: 'w-4 h-4' })}
             <span>{label} {amount}</span>
             <X
                 className="cursor-pointer text-foreground/[.5] hover:text-foreground"
@@ -49,10 +51,10 @@ const PaymentNodeBase = ({ data: { amount, label }, id, selected, width, height 
     );
 }
 
-export const PaypalNode = (props: CustomNode) => <PaymentNodeBase {...props} data={{ label: 'Paypal', amount: '' }} />;
-export const GooglePayNode = (props: CustomNode) => <PaymentNodeBase {...props} data={{ label: 'Google Pay', amount: '' }} />;
-export const StripeNode = (props: CustomNode) => <PaymentNodeBase {...props} data={{ label: 'Stripe', amount: '' }} />;
-export const ApplePayNode = (props: CustomNode) => <PaymentNodeBase {...props} data={{ label: 'Apple Pay', amount: '' }} />;
+export const PaypalNode = (props: CustomNode) => <PaymentNodeBase {...props} data={{ label: 'Paypal', amount: '', icon: Icons.paypal }} />;
+export const GooglePayNode = (props: CustomNode) => <PaymentNodeBase {...props} data={{ label: 'Google Pay', amount: '', icon: Icons.googlePay }} />;
+export const StripeNode = (props: CustomNode) => <PaymentNodeBase {...props} data={{ label: 'Stripe', amount: '', icon: Icons.stripe }} />;
+export const ApplePayNode = (props: CustomNode) => <PaymentNodeBase {...props} data={{ label: 'Apple Pay', amount: '', icon: Icons.applePay }} />;
 
 
 export const PaymentInitializedNode = ({ data, id }: CustomNode) => {
@@ -87,6 +89,10 @@ export const CustomControls = () => {
     const MetaZPressed = useKeyPress(['Meta+z']);
     const MetaXPressed = useKeyPress(['Meta+x']);
     const MetaSPressed = useKeyPress(['Meta+s']);
+    const pPressed = useKeyPress(['p']);
+    const sPressed = useKeyPress(['s']);
+    const aPressed = useKeyPress(['a']);
+    const gPressed = useKeyPress(['g']);
 
     useEffect(() => {
         if (MetaZPressed) {
@@ -98,7 +104,19 @@ export const CustomControls = () => {
         else if (MetaSPressed) {
             onSave();
         }
-    }, [MetaZPressed, MetaXPressed, MetaSPressed]);
+        else if (pPressed) {
+            handlePaymentMethodChange('paypal');
+        }
+        else if (sPressed) {
+            handlePaymentMethodChange('stripe');
+        }
+        else if (aPressed) {
+            handlePaymentMethodChange('applePay');
+        }
+        else if (gPressed) {
+            handlePaymentMethodChange('googlePay');
+        }
+    }, [MetaZPressed, MetaXPressed, MetaSPressed, pPressed, sPressed, aPressed, gPressed]);
 
     const handlePaymentMethodChange = (value: string) => {
         const alreadyExists = getNodes().some((node) => node.type === value);
@@ -196,17 +214,25 @@ export const CustomControls = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56">
                 <DropdownMenuRadioGroup onValueChange={handlePaymentMethodChange} >
-                    <DropdownMenuRadioItem value="paypal">
+                    <DropdownMenuRadioItem value="paypal" className="flex items-center gap-2" >
+                        <Icons.paypal className="w-4 h-4" />
                         <span>Paypal</span>
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="googlePay">
+                        <DropdownMenuShortcut>P</DropdownMenuShortcut>
+                    </DropdownMenuRadioItem >
+                    <DropdownMenuRadioItem value="googlePay" className="flex items-center gap-2" >
+                        <Icons.googlePay className="w-4 h-4" />
                         <span>Google Pay</span>
+                        <DropdownMenuShortcut>G</DropdownMenuShortcut>
                     </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="stripe">
+                    <DropdownMenuRadioItem value="stripe" className="flex items-center gap-2" >
+                        <Icons.stripe className="w-4 h-4" />
                         <span>Stripe</span>
+                        <DropdownMenuShortcut>S</DropdownMenuShortcut>
                     </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="applePay">
+                    <DropdownMenuRadioItem value="applePay" className="flex items-center gap-2" >
+                        <Icons.applePay className="w-4 h-4" />
                         <span>Apple Pay</span>
+                        <DropdownMenuShortcut>A</DropdownMenuShortcut>
                     </DropdownMenuRadioItem>
                 </DropdownMenuRadioGroup>
             </DropdownMenuContent>
